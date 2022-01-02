@@ -1,0 +1,32 @@
+.main {
+    width: 760px;
+}
+
+.banner {
+    width: 760px;
+    margin: 0 auto;
+}
+
+.banner img {
+    max-width: 400px;
+    margin-left: 175px;
+}
+
+.form-container {
+    margin-top: 25px;
+}
+
+.button-container {
+    margin-top: 15px;
+}
+
+.list-container {
+    width: 460px;
+}
+
+.dropdown-menu{
+    height: 200px;
+    width: 760px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}

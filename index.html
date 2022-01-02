@@ -1,0 +1,180 @@
+<html>
+    <head>
+        <title>Volflix</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <div class="container main">
+            <div class="banner">
+                <img src="https://cnec.ncsu.edu/wp-content/uploads/University-HorizRightLogo-RGB.png"/>
+            </div>
+
+            <h3>What is Volflix?</h3>
+            <p><strong>VolFlix</strong> is a (non-real) service provided by the University of Tennessee that helps people find new movies based on prior moves that you've enjoyed.</p>
+
+            <p><strong>Select the Content-based or Collaborative Filtering Tabs below to use Volflix.</strong></p>
+
+
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link active" id="content-tab" data-toggle="tab" href="#content" role="tab" aria-controls="content" aria-selected="true">Content-based Filtering</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="collaborative-tab" data-toggle="tab" href="#collaborative" role="tab" aria-controls="collaborative" aria-selected="false">Collaborative Filtering</a>
+                </li>
+              </ul>
+              <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="content" role="tabpanel" aria-labelledby="content-tab">
+
+                    <p style="margin-top: 10px;">Select a movie from the dropdown list below, and click "Get Recommendations". Based on your selection, Volflix will provide five movie recommendations below. The "Clear" button will clear your current movie selection and reset the interface.</p>
+
+                    <p>Note: Buttons are disabled until a movie has been selected.</p>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Select a Movie
+                        </button>
+        
+                        <!-- This is populated dynamically from p2-data.json-->
+                        <div id="movie-list" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div> 
+                      </div>
+                      
+        
+                    <div class='form-container'>
+                        <p><strong>Current Selection:</strong> <span class="content-current-selection">None</span></p>
+        
+                        <div class='button-container'>
+                            <button id="content-generate" type="button" class="btn btn-primary btn" disabled>Generate Recommendations</button>
+                            <button id="content-clear" type="button" class="btn btn-secondary btn" disabled>Clear</button>
+                        </div>
+                    </div>
+                    <hr/>
+        
+                    <div id="content-recommendation-container">
+                    </div>
+
+                </div>
+                <div class="tab-pane fade" id="collaborative" role="tabpanel" aria-labelledby="collaborative-tab">
+
+                    <p style="margin-top: 10px;">Select a user ID from the dropdown list below, and click "Get Recommendations". Based on your selection, Volflix will provide five movie recommendations below. The "Clear" button will clear your current movie selection and reset the interface.</p>
+
+                    <p>Note: Buttons are disabled until a movie has been selected.</p>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Select a User ID
+                        </button>
+        
+                        <!-- This is populated dynamically from p2-data.json-->
+                        <div id="user-list" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div> 
+                      </div>
+                      
+        
+                    <div class='form-container'>
+                        <p><strong>Current Selection:</strong> <span class="collab-current-selection">None</span></p>
+        
+                        <div class='button-container'>
+                            <button id="collab-generate" type="button" class="btn btn-primary btn" disabled>Generate Recommendations</button>
+                            <button id="collab-clear" type="button" class="btn btn-secondary btn" disabled>Clear</button>
+                        </div>
+                    </div>
+                    <hr/>
+        
+                    <div id="collab-recommendation-container">
+                    </div>
+
+                </div>
+              </div>
+        </div>
+        <script src="js/jquery.3.3.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script>
+            // Get the list of movies.
+            $.getJSON("http://localhost:8080/data/movies.json", function(data){
+                console.log("Movies Retrieved:");
+                console.log(data);
+                data.forEach(function(item){
+                    $('#movie-list').append('<a class="dropdown-item content-dropdown-item" href="#">'+item.name+'</a>');
+                });
+
+                $('.content-dropdown-item').click(function(e){
+                    var selection = $(e.target).text();
+                    $('.content-current-selection').text(selection);
+
+                    $('#content-generate').prop('disabled', false);
+                    $('#content-clear').prop('disabled', false);
+                });
+
+            }).fail(function(){
+                alert("[ERROR] Unable to get data at \"http://localhost:8080/data/movies.json\"");
+            });
+
+            $("#content-generate").click(function(){
+                $.post("http://localhost:9000", {'title': $('.content-current-selection').text(), 'type' : 'content-based'}).done(function(data){
+                    console.log("Response from Server:");
+                    console.log(data);
+                    $('#content-recommendation-container').empty();
+                    $('#content-recommendation-container').append('<strong>Based on your selection, we think you might like:</strong><ul id="content-recommendation-list" class="list-group"></ul>');
+
+                    for(var i=0; i< data['movies'].length; i++){
+                        $('#content-recommendation-list').append('<li class="list-group-item d-flex justify-content-between align-items-center">'+data['movies'][i].title+'<span class="badge badge-primary badge-pill">'+data['movies'][i].cosine_sim+'</span></li>');
+                    }
+                }).fail(function(){
+                alert("[ERROR] Can't connet to Recommendation Web Server at \"http://localhost:9000\"");
+            });
+            });
+
+            $("#content-clear").click(function(){
+                $('.content-content-current-selection').text('None');
+                $('#content-generate').prop('disabled', true);
+                $('#content-clear').prop('disabled', true);
+                $('#content-recommendation-container').empty();
+            });
+
+            // Collaborative Filtering UI
+            // Get the list of movies.
+            $.getJSON("http://localhost:8080/data/users.json", function(data){
+                console.log("Users Retrieved:");
+                console.log(data);
+                data.forEach(function(item){
+                    $('#user-list').append('<a class="dropdown-item collab-dropdown-item" href="#">'+item.user+'</a>');
+                });
+
+                $('.collab-dropdown-item').click(function(e){
+                    var selection = $(e.target).text();
+                    $('.collab-current-selection').text(selection);
+
+                    $('#collab-generate').prop('disabled', false);
+                    $('#collab-clear').prop('disabled', false);
+                });
+
+            }).fail(function(){
+                alert("[ERROR] Unable to get data at \"http://localhost:8080/data/users.json\"");
+            });
+
+            $("#collab-generate").click(function(){
+                $.post("http://localhost:9000", {'user': $('.collab-current-selection').text(), 'type' : 'collaborative'}).done(function(data){
+                    console.log("Response from Server:");
+                    console.log(data);
+                    $('#collab-recommendation-container').empty();
+                    $('#collab-recommendation-container').append('<strong>Based on your selection, we think you might like:</strong><ul id="collab-recommendation-list" class="list-group"></ul>');
+
+                    for(var i=0; i< data['movies'].length; i++){
+                        $('#collab-recommendation-list').append('<li class="list-group-item d-flex justify-content-between align-items-center">'+data['movies'][i].title+'<span class="badge badge-primary badge-pill">'+data['movies'][i].rating+'</span></li>');
+                    }
+                }).fail(function(){
+                alert("[ERROR] Can't connet to Recommendation Web Server at \"http://localhost:9000\"");
+            });
+            });
+
+            $("#collab-clear").click(function(){
+                $('.collab-current-selection').text('None');
+                $('#collab-generate').prop('disabled', true);
+                $('#collab-clear').prop('disabled', true);
+                $('#collab-recommendation-container').empty();
+            });
+        </script>
+    </body>
+</html>
