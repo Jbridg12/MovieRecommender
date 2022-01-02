@@ -19,7 +19,7 @@ From the Volfix browser page there are two options provided for you. You can sel
 "Content-based filtering" tab to find movies similar to a given movie. Or you can select
 the "Collaborative-based filtering" tab to see movies recommended to a certain user.
 
-#Running Heads Up
+# Running Heads Up
 The process as a whole is extremely slow to boot up as is. During the startup of the server, 
 the calculations for the collaborative-based filtering require almost too much time. I recommend 
 before running to go to line 297 and change the range(1, 611) to range(1, 5) or lower to allow
